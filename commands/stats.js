@@ -11,11 +11,18 @@ module.exports = {
             const date = result.timeCreated;
             message.channel.send(`Your account was created on ${date.getMonth()+1}-${date.getDate()}-${date.getFullYear()} `)
                 .then(function(msg){
-                 msg.react('682130663553499146');
-                 const filter = (reaction) => reaction.emoji.name = 'thumbsup';
+                 //msg.react('682130663553499146');
+                 const filter = (reaction) => reaction.emoji.name === '👍' || reaction.emoji.name === '💩';
                  const collector = msg.createReactionCollector(filter, {time: 15000})
-                 collector.on('collect', r => console.log(r.emoji.name));
-                 collector.on('end', collected => console.log(collected));
+                 collector.on('collect', (reaction) => console.log(reaction.emoji.name));
+                 collector.on('end', collected => {
+                     console.log(typeof(collected));
+                    for(const[emoji,reaction] of collected.entries()){
+                        for(const[id,userData] of reaction.users.entries()){
+                        console.log(`${userData.username} reacted with ${emoji}`);
+                        }
+                    }
+                 });
             }).catch(console.error);
             //message.channel.send("<:WoW:682130663553499146>");
             }
