@@ -61,7 +61,9 @@ async function updateListingByName(client, nameOfListing, updatedListing) {
 }
 
 async function addField(client){
-    result = await client.db("Discord_Game").collection("playerData").updateMany({},{$set: {gold: 0}});
+    result = await client.db("Discord_Game").collection("playerData").updateMany({},{$set: {level: 69, gold: 420}});
+    console.log(`${result.matchedCount} document(s) matched the query criteria.`);
+    console.log(`${result.modifiedCount} document(s) was/were updated.`);
 }
 
 

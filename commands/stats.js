@@ -11,12 +11,12 @@ module.exports = {
             }else{
             const date = results.timeCreated;
             const embed = new Discord.RichEmbed()
-                .setTitle(`${message.author.username}'s Character`)
+                .setTitle(`${message.author.username}'s Character\nLevel ${results.level}`)
                 .setAuthor(`RPG BOT`,'','')
-                .addField(`Stats`,`Gold: ${results.gold}`)
+                .addField(`Stats`,`:moneybag: Gold: ${results.gold}`)
                 .setThumbnail(message.author.avatarURL)
                 .setTimestamp()
-                .setFooter(`Character made on ${date.getMonth()+1}-${date.getDate()}-${date.getFullYear()}`,'')
+                .setFooter(`Character created on ${date.getMonth()+1}-${date.getDate()}-${date.getFullYear()}`,'')
 
             message.channel.send(embed);
             /*

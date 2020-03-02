@@ -12,6 +12,7 @@ module.exports = {
                 client.db("Discord_Game").collection("playerData").insertOne({
                     discordID: message.author.id,
                     gold: 100,
+                    level: 1,
                     timeCreated: new Date()
                 }).then(function(result){
                         message.reply('Your account has been created!');
