@@ -18,8 +18,9 @@ try{
     //await listDatabases(client);
     //await createListing(client, newListing)
     //awaitfindOneListingByName(client, 'TestName');
-    await updateListingByName(client, 'TestName', {Level: 200});
-    await findOneListingByName(client,'TestName');
+    //await updateListingByName(client, 'TestName', {Level: 200});
+    //await findOneListingByName(client,'TestName');
+    await addField(client);
 }catch(e){
     console.error(e);
 }finally{
@@ -57,6 +58,10 @@ async function updateListingByName(client, nameOfListing, updatedListing) {
  
     console.log(`${result.matchedCount} document(s) matched the query criteria.`);
     console.log(`${result.modifiedCount} document(s) was/were updated.`);
+}
+
+async function addField(client){
+    result = await client.db("Discord_Game").collection("playerData").updateMany({},{$set: {gold: 0}});
 }
 
 
