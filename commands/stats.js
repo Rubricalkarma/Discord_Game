@@ -11,7 +11,9 @@ module.exports = {
             }else{
             const date = results.timeCreated;
             const embed = new Discord.RichEmbed()
-                .setTitle(`${message.author.username}'s Character\nLevel ${results.level}`)
+                .setColor('BLUE')
+                .setTitle(`${message.author.username}'s Character`)
+                .setDescription(`Level ${results.level} ${results.race.toUpperCase()} ${results.class.toUpperCase()}`)
                 .setAuthor(`RPG BOT`,'','')
                 .addField(`Stats`,`:moneybag: Gold: ${results.gold}`)
                 .setThumbnail(message.author.avatarURL)

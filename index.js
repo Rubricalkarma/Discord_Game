@@ -49,16 +49,37 @@ client.on('message', msg => {
 
 	const args = msg.content.slice(prefix.length).split(/ +/);
 	const command = args.shift().toLowerCase();
+
 	//console.log(client.commands);
 
 	if (!client.commands.has(command)) {
+		msg.reply('Unknown command \`'+command+'\`\nUse `help` for a list of commands!')
 		console.log(`Command ${command} not found!`);
 		return;
 	}
 
 	try {
-		client.commands.get(command).execute(msg, args, mongoClient);
+
+		/*CHECKS IF USER HAS ACCOUNT*/
+		mongoClient.db("Discord_Game").collection("playerData").findOne({ discordID: msg.author.id })
+        .then(function(result){
+			/*IF NOT RETURNS*/
+			if(command === 'start'){
+				if(result !== null){
+				msg.reply('You already have a character! Use command `delete` to delete your character to startover.')
+				}else{
+					client.commands.get(command).execute(msg, args, mongoClient);
+				}
+				return;
+			}
+			if(result === null){
+				msg.reply('You need an account to play, use command `start` to get started!')
+				return;
+			}
+			/*OTHERWISE EXECUTES COMMAND*/
+		client.commands.get(command).execute(msg, args, mongoClient,result);
 		console.log(`command executed: ${client.commands.get(command).name} for ${msg.author.tag}`);
+		});
 	} catch (error) {
 		console.error(error);
 		msg.reply('Sorry, there was an error executing that command. The Server may be down!')
