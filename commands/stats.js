@@ -15,7 +15,10 @@ module.exports = {
                 .setTitle(`${message.author.username}'s Character`)
                 .setDescription(`Level ${results.level} ${results.race.toUpperCase()} ${results.class.toUpperCase()}`)
                 .setAuthor(`RPG BOT`,'','')
-                .addField(`Stats`,`:moneybag: Gold: ${results.gold}`)
+                .addField(`Stats`,`
+                :moneybag: Gold: ${results.gold}
+                :zap: Energy: ${results.energy.energy}/${results.energy.maxEnergy}`)
+                .addField(`Skills`,`:pick: Mining: ${results.skills.mining.level}`)
                 .setThumbnail(message.author.avatarURL)
                 .setTimestamp()
                 .setFooter(`Character created on ${date.getMonth()+1}-${date.getDate()}-${date.getFullYear()}`,'')

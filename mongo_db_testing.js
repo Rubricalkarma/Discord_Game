@@ -61,7 +61,17 @@ async function updateListingByName(client, nameOfListing, updatedListing) {
 }
 
 async function addField(client){
-    result = await client.db("Discord_Game").collection("playerData").updateMany({},{$set: {class: 'fighter', race: 'human'}});
+    //result = await client.db("Discord_Game").collection("playerData").updateMany({},{$set: {skills: {mining: {level: 1, experience: 0}}}});
+    result = await client.db("Discord_Game").collection("playerData").updateMany({},
+        {$set: {
+            energy:{
+                energy: 0,
+                maxEnergy: 30,
+                minutesForEnergy: 30,
+                lastClaim: new Date()
+            }
+        }
+    });
     console.log(`${result.matchedCount} document(s) matched the query criteria.`);
     console.log(`${result.modifiedCount} document(s) was/were updated.`);
 }

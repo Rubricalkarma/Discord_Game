@@ -3,7 +3,7 @@ module.exports = {
 	description: 'Create a character',
 	execute(message, args, client) {
         if(args.length === 0 || args[0] === 'help'){
-            /*TODO ADDED INSTRUCTIONS*/
+            /*TODO ADD INSTRUCTIONS*/
             message.channel.send('Current Classes: fighter, mage and rogue\nCurrent Races: human, orc, goblin, elf\nUse command \`start race class\`')
             return;
         }
@@ -27,14 +27,31 @@ module.exports = {
             return;
         }
 
-                client.db("Discord_Game").collection("playerData").insertOne({
-                    discordID: message.author.id,
-                    gold: 100,
+        let data = {
+            discordID: message.author.id,
+            gold: 100,
+            level: 1,
+            race: args[0],
+            class: args[1],
+            energy:{
+                energy: 0,
+                maxEnergy: 30,
+                minutesForEnergy: 30,
+                lastClaim: new Date()
+            },
+            skills:{
+                mining:{
                     level: 1,
-                    race: args[0],
-                    class: args[1],
-                    timeCreated: new Date()
-                }).then(function(result){
+                    experience: 0,
+                }
+            },
+            timeCreated: new Date()
+
+        }
+
+                client.db("Discord_Game").collection("playerData").insertOne(
+                    data
+                ).then(function(result){
                         message.reply('Your character has been created!');
 
                 }).catch(function(error){
