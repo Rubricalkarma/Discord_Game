@@ -2,7 +2,8 @@ module.exports = {
     claimEnergy: claimEnergy,
     payEnergy: payEnergy,
     experienceForLevel:experienceForLevel,
-    gainExp:gainExp
+    gainExp:gainExp,
+    calcExp:calcExp
 };
 
 function claimEnergy(client, player) {
@@ -89,7 +90,15 @@ function payEnergy(client, player, cost) {
     }
 }
 
+function calcExp(level, difficulty){
+    var xp = 4*level*difficulty
+    var min = xp - (xp * .2);
+    var max = xp + (xp * .2);
+    return Math.floor(Math.random() * (max - min + 1) + min)
+}
+
 function gainExp(player, experienceGained, skill, message, client){
+    const Discord = require('discord.js')
     var exp = player.skills[skill].experience + experienceGained;
     var level = player.skills[skill].level;
     var levelsGained = 0;
@@ -100,9 +109,14 @@ function gainExp(player, experienceGained, skill, message, client){
         levelsGained++;
         expForLevel = experienceForLevel(level+1);
     }
+    var embed = new Discord.RichEmbed()
+    .setTitle(`${player.skills[skill].emote} Mining`)
+    var mString = `Your ${capitalize(skill)} skill gained ${experienceGained} XP!`
     if(levelsGained > 0){
-        message.channel.send(`You gained ${levelsGained} level(s) in ${skill}!\nYour ${skill} is now level ${level}`)
+        mString +=`\nCongrats! Your ${capitalize(skill)} is now level ${level}!`;
     }
+    embed.setDescription(mString)
+    message.channel.send(embed);
     let levelDB = `skills.${skill}.level`
     let expDB = `skills.${skill}.experience`
     return client.db("Discord_Game").collection("playerData").updateOne({ discordID: message.author.id },
@@ -115,10 +129,10 @@ function gainExp(player, experienceGained, skill, message, client){
         });
 }
 
-function levelUp(player, level, experienceGained, skill){
-
-}
-
 function experienceForLevel(level){
     return Math.round(Math.ceil(4.5*Math.pow(level+1,3)/5)/5)*5;
+}
+
+function capitalize(x){
+    return x.charAt(0).toUpperCase() + x.substring(1);
 }

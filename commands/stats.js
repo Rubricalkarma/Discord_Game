@@ -10,18 +10,6 @@ module.exports = {
         }else{
             energyText = (player.energy.minutesForEnergy*60000 - ((Math.abs(new Date() - player.energy.lastClaim) + player.energy.bonusTime) % (player.energy.minutesForEnergy * 60000)))/60000;
         }
-        var skills = player.skills;
-        var index = [];
-        for(var x in skills){
-            index.push(x);
-        }
-        var string = "";
-        for(let i = 0; i<index.length;i++){
-            var s = player.skills[index[i]];
-            console.log(s)
-            string += `${s.emote} ${capitalize(index[i])} ${s.level} - ${s.experience}/${helper.experienceForLevel(s.level+1)} XP\n`
-            
-        }
             const date = player.timeCreated;
         const embed = new Discord.RichEmbed()
             .setColor('BLUE')
@@ -31,7 +19,7 @@ module.exports = {
             .addField(`Stats`, `
                 :moneybag: Gold: ${player.gold}
                 :zap: Energy: ${player.energy.energy}/${player.energy.maxEnergy} - ${energyText}`)
-            .addField(`Skills`, string)
+            .addField(`Skills`, getSkillString(player))
             .setThumbnail(message.author.avatarURL)
             .setTimestamp()
             .setFooter(`Character created on ${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`, '')
@@ -60,6 +48,20 @@ module.exports = {
 
         function capitalize(x){
             return x.charAt(0).toUpperCase() + x.substring(1);
+        }
+
+        function getSkillString(player){
+            var skills = player.skills;
+            var index = [];
+            for(var x in skills){
+                index.push(x);
+            }
+            var string = "";
+            for(let i = 0; i<index.length;i++){
+                var s = player.skills[index[i]];
+                string += `${s.emote} ${capitalize(index[i])} ${s.level} - ${s.experience}/${helper.experienceForLevel(s.level+1)} XP\n`
+            }
+            return string;
         }
     },
 };
