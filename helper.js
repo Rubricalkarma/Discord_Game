@@ -91,9 +91,10 @@ function payEnergy(client, player, cost) {
 }
 
 function calcExp(level, difficulty){
-    var xp = 4*level*difficulty
+    var xp = 6*level*difficulty
     var min = xp - (xp * .2);
     var max = xp + (xp * .2);
+    console.log(`Level ${level}: ${min} - ${max}`)
     return Math.floor(Math.random() * (max - min + 1) + min)
 }
 

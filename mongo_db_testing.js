@@ -62,6 +62,7 @@ async function updateListingByName(client, nameOfListing, updatedListing) {
 
 async function addField(client){
     //result = await client.db("Discord_Game").collection("playerData").updateMany({},{$set: {skills: {mining: {level: 1, experience: 0}}}});
+    /*
     result = await client.db("Discord_Game").collection("playerData").updateMany({},
         {$set: {
             skills:{
@@ -83,6 +84,24 @@ async function addField(client){
             }
         }
     });
+    */
+   result = await client.db("Discord_Game").collection("TEST_ITEMS").insertOne({
+           items:{
+               orange:{
+                   id: 1,
+                   color:'orange'
+               },
+               banana:{
+                   id: 2,
+                   color: 'yellow'
+               },
+               apple:{
+                   id:3,
+                   color: 'red'
+               }
+           }
+       
+   })
     console.log(`${result.matchedCount} document(s) matched the query criteria.`);
     console.log(`${result.modifiedCount} document(s) was/were updated.`);
 }
