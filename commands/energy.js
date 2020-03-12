@@ -1,13 +1,34 @@
 module.exports = {
-	name: 'energy',
-	description: 'template',
-	execute(message, args, client, player) {
-        const currentTime = new Date();
-        var diff = Math.abs(currentTime - player.energy.lastClaim);
-        var minutes = Math.floor(diff/60000)
-        console.log(`Minute(s) since last claim: ${minutes}`);
-        var energyToClaim = Math.floor(minutes/player.energy.minutesForEnergy)
-        var remainingTime = minutes % player.energy.minutesForEnergy;
-        message.reply(`You have ${energyToClaim} energy to claim!\nThere are ${remainingTime} minute(s) until your next energy!`)
-	},
+        name: 'energy',
+        description: 'template',
+        execute(message, args, client, player) {
+                /*ADMIN COMMNAND*/
+                if (args[0] === 'set') {
+                        return client.db("Discord_Game").collection("playerData").updateOne({ discordID: player.discordID },
+                                {
+                                        $set:
+                                        {
+                                                "energy.energy": parseInt(args[1])
+
+                                        }
+                                });
+                }
+
+                var millis = -1;
+                var maxEnergy = false;
+                var text = "";
+                if (player.energy.energy >= player.energy.maxEnergy) {
+                        text = "You are currently at max energy!"
+                        maxEnergy = true;
+                } else {
+                        millis = (player.energy.minutesForEnergy * 60000 - ((Math.abs(new Date() - player.energy.lastClaim) + player.energy.bonusTime) % (player.energy.minutesForEnergy * 60000)));
+                        var minutes = Math.floor(millis / 60000);
+                        //var seconds = ((millis % 60000) / 1000).toFixed(0);
+                }
+
+                message.reply(`You currently have ${player.energy.energy}/${player.energy.maxEnergy}, You will recieve your next energy in ~${minutes} minute(s)
+                \nYou gain \`1\` energy every \`${player.energy.minutesForEnergy}\` minute(s)`);
+
+
+        },
 };

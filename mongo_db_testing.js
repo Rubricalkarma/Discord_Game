@@ -64,11 +64,22 @@ async function addField(client){
     //result = await client.db("Discord_Game").collection("playerData").updateMany({},{$set: {skills: {mining: {level: 1, experience: 0}}}});
     result = await client.db("Discord_Game").collection("playerData").updateMany({},
         {$set: {
-            energy:{
-                energy: 0,
-                maxEnergy: 30,
-                minutesForEnergy: 30,
-                lastClaim: new Date()
+            skills:{
+                mining:{
+                    emote: ":pick:",
+                    level: 1,
+                    experience: 0
+                },
+                foraging:{
+                    emote:":herb:",
+                    level: 1,
+                    experience: 0
+                },
+                fishing:{
+                    emote:":fishing_pole_and_fish:",
+                    level: 1,
+                    experience: 0
+                }
             }
         }
     });
