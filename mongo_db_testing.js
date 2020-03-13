@@ -29,6 +29,10 @@ async function main() {
 
 }
 
+async function addItemTest(client){
+    
+}
+
 async function listDatabases(client) {
     databasesList = await client.db().admin().listDatabases();
 
@@ -85,25 +89,25 @@ async function addField(client) {
         }
     });
     */
-    
-    result = await client.db("Discord_Game").collection("TEST_ITEMS").insertOne({
-            items:{
-                orange:{
-                    id: 1,
-                    color:'orange'
-                },
-                banana:{
-                    id: 2,
-                    color: 'yellow'
-                },
-                apple:{
-                    id:3,
-                    color: 'red'
-                }
-            }
-        
-    })
-    
+
+    result = await client.db("Discord_Game").collection("TEST_ITEMS").insertMany(
+        [{
+            name: 'banana',
+            itemID: 1,
+            value: 10
+        },
+        {
+            name: 'orange',
+            itemID: 2,
+            value: 20
+        },
+        {
+            name: 'apple',
+            itemID: 3,
+            value: 30
+        }]
+    )
+
     /*
     result = await client.db("Discord_Game").collection("playerData").updateMany({}, {
         $set: {
@@ -128,11 +132,10 @@ async function addField(client) {
                     level: 1,
                     experience: 0
                 }
-
+    
             }
         }
         */
-    });
     console.log(`${result.matchedCount} document(s) matched the query criteria.`);
     console.log(`${result.modifiedCount} document(s) was/were updated.`);
 }
