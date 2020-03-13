@@ -112,7 +112,7 @@ function gainExp(player, experienceGained, skill, message, client){
     }
     var embed = new Discord.RichEmbed()
     .setTitle(`${player.skills[skill].emote} Mining`)
-    var mString = `Your ${capitalize(skill)} skill gained ${experienceGained} XP!`
+    var mString = `Your ${capitalize(skill)} skill gained ${experienceGained} XP!  [${exp}/${expForLevel}]`
     if(levelsGained > 0){
         mString +=`\nCongrats! Your ${capitalize(skill)} is now level ${level}!`;
     }

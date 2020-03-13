@@ -11,6 +11,7 @@ module.exports = {
             energyText = (player.energy.minutesForEnergy*60000 - ((Math.abs(new Date() - player.energy.lastClaim) + player.energy.bonusTime) % (player.energy.minutesForEnergy * 60000)))/60000;
         }
             const date = player.timeCreated;
+            var skillStats = getSkillString(player);
         const embed = new Discord.RichEmbed()
             .setColor('BLUE')
             .setTitle(`${message.author.username}'s Character`)
@@ -19,7 +20,9 @@ module.exports = {
             .addField(`Stats`, `
                 :moneybag: Gold: ${player.gold}
                 :zap: Energy: ${player.energy.energy}/${player.energy.maxEnergy} - ${energyText}`)
-            .addField(`Skills`, getSkillString(player))
+            .addField(`Skills`, skillStats[0],true)
+            .addField(`Level`,skillStats[1],true)
+            .addField(`Experience`,skillStats[2],true)
             .setThumbnail(message.author.avatarURL)
             .setTimestamp()
             .setFooter(`Character created on ${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`, '')
@@ -53,13 +56,19 @@ module.exports = {
         function getSkillString(player){
             var skills = player.skills;
             var index = [];
+            var string = ["","",""];
             for(var x in skills){
                 index.push(x);
             }
-            var string = "";
+            
             for(let i = 0; i<index.length;i++){
                 var s = player.skills[index[i]];
-                string += `${s.emote} ${capitalize(index[i])} ${s.level} - ${s.experience}/${helper.experienceForLevel(s.level+1)} XP\n`
+                var exp = s.experience;
+                var expNeeded = helper.experienceForLevel(s.level+1)
+                var percent = Math.round(exp/expNeeded*100)
+                string[0] += `${s.emote} ${capitalize(index[i])}\n`
+                string[1] +=`${s.level}\n`
+                string[2] += `[${percent}%] ${exp}/${expNeeded} XP\n`
             }
             return string;
         }
