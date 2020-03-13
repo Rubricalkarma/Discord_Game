@@ -12,7 +12,7 @@ module.exports = {
 
         Promise.all(promises).then(vals => {
             vals.forEach(x => {
-                console.log(x.itemID)
+                console.log(x.name)
             })
         })
         /*
