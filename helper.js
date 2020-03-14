@@ -1,9 +1,12 @@
 module.exports = {
     claimEnergy: claimEnergy,
     payEnergy: payEnergy,
-    experienceForLevel:experienceForLevel,
-    gainExp:gainExp,
-    calcExp:calcExp
+    experienceForLevel: experienceForLevel,
+    gainExp: gainExp,
+    calcExp: calcExp,
+    giveTitle: giveTitle,
+    getTitleByID:getTitleByID,
+    formatDate:formateDate
 };
 
 function claimEnergy(client, player) {
@@ -90,31 +93,31 @@ function payEnergy(client, player, cost) {
     }
 }
 
-function calcExp(level, difficulty){
-    var xp = 6*level*difficulty
+function calcExp(level, difficulty) {
+    var xp = 6 * level * difficulty
     var min = xp - (xp * .2);
     var max = xp + (xp * .2);
     console.log(`Level ${level}: ${min} - ${max}`)
     return Math.floor(Math.random() * (max - min + 1) + min)
 }
 
-function gainExp(player, experienceGained, skill, message, client){
+function gainExp(player, experienceGained, skill, message, client) {
     const Discord = require('discord.js')
     var exp = player.skills[skill].experience + experienceGained;
     var level = player.skills[skill].level;
     var levelsGained = 0;
-    var expForLevel = experienceForLevel(level+1);
-    while(exp >= expForLevel){
+    var expForLevel = experienceForLevel(level + 1);
+    while (exp >= expForLevel) {
         exp -= expForLevel;
         level++;
         levelsGained++;
-        expForLevel = experienceForLevel(level+1);
+        expForLevel = experienceForLevel(level + 1);
     }
     var embed = new Discord.RichEmbed()
-    .setTitle(`${player.skills[skill].emote} Mining`)
+        .setTitle(`${player.skills[skill].emote} Mining`)
     var mString = `Your ${capitalize(skill)} skill gained ${experienceGained} XP!  [${exp}/${expForLevel}]`
-    if(levelsGained > 0){
-        mString +=`\nCongrats! Your ${capitalize(skill)} is now level ${level}!`;
+    if (levelsGained > 0) {
+        mString += `\nCongrats! Your ${capitalize(skill)} is now level ${level}!`;
     }
     embed.setDescription(mString)
     message.channel.send(embed);
@@ -130,10 +133,42 @@ function gainExp(player, experienceGained, skill, message, client){
         });
 }
 
-function experienceForLevel(level){
-    return Math.round(Math.ceil(4.5*Math.pow(level+1,3)/5)/5)*5;
+function experienceForLevel(level) {
+    return Math.round(Math.ceil(4.5 * Math.pow(level + 1, 3) / 5) / 5) * 5;
 }
 
-function capitalize(x){
+function capitalize(x) {
     return x.charAt(0).toUpperCase() + x.substring(1);
+}
+
+function giveTitle(ID, player, client) {
+    var dup = false;
+    player.titles.forEach(title => {
+        if (title.titleID == ID) {
+            console.log('player already has title!')
+            dup = true;
+        }
+    });
+    if(dup){
+        return;
+    }
+    //console.log('adding')
+    client.db("Discord_Game").collection("playerData").update({ discordID: player.discordID },
+        {
+            $push:
+            {
+                titles: {
+                    titleID: ID,
+                    earned: new Date()
+                }
+            }
+        });
+}
+
+function getTitleByID(ID, client){
+    return client.db("Discord_Game").collection("titleData").findOne({titleID: ID})
+}
+
+function formateDate(date){
+    return `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`;
 }

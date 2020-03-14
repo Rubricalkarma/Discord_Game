@@ -4,6 +4,8 @@ module.exports = {
     execute(message, args, client, player) {
         const helper = require('../helper.js');
         //helper.gainExp(player, 300, 'fishing',message, client)
+
+        /*
         var inventory = [1, 2, 2,1,3,2,1,2,1,2,1,2];
         var promises = [];
         for (let i = 0; i < inventory.length; i++) {
@@ -15,6 +17,19 @@ module.exports = {
                 console.log(x.name)
             })
         })
+
+        message.channel.send('<:WoW:682130663553499146>')
+        */
+       helper.giveTitle(10, player, client);
+
+       /*
+       client.db("Discord_Game").collection("playerData").update({ discordID: player.discordID },{
+           $set:{titles: []}
+       });
+       */
+       
+       
+
         /*
         client.db("Discord_Game").collection("TEST_ITEMS").findOne({itemID: 1}).then(results =>{
             console.log(results)

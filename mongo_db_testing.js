@@ -6,6 +6,7 @@ const newListing = {
     Bathrooms: 1
 }
 
+
 async function main() {
 
     //#region URI
@@ -20,7 +21,8 @@ async function main() {
         //awaitfindOneListingByName(client, 'TestName');
         //await updateListingByName(client, 'TestName', {Level: 200});
         //await findOneListingByName(client,'TestName');
-        await addField(client);
+        await addTitle(client,"Noob", "common", "Earned for being a big noob")
+        //await addField(client);
     } catch (e) {
         console.error(e);
     } finally {
@@ -64,8 +66,19 @@ async function updateListingByName(client, nameOfListing, updatedListing) {
     console.log(`${result.modifiedCount} document(s) was/were updated.`);
 }
 
+async function addTitle(client, name, rarity, description){
+    var data = {
+        titleID: 10,
+        name: name,
+        rarity: rarity,
+        description: description
+    }
+    await client.db("Discord_Game").collection("titleData").insertOne(data);
+}
+
 async function addField(client) {
-    //result = await client.db("Discord_Game").collection("playerData").updateMany({},{$set: {skills: {mining: {level: 1, experience: 0}}}});
+
+    result = await client.db("Discord_Game").collection("playerData").updateMany({},{$set: {setTitleID: null, titles: []}});
     /*
     result = await client.db("Discord_Game").collection("playerData").updateMany({},
         {$set: {
@@ -89,7 +102,7 @@ async function addField(client) {
         }
     });
     */
-
+    /*
     result = await client.db("Discord_Game").collection("TEST_ITEMS").insertMany(
         [{
             name: 'banana',
@@ -107,7 +120,7 @@ async function addField(client) {
             value: 30
         }]
     )
-
+        */
     /*
     result = await client.db("Discord_Game").collection("playerData").updateMany({}, {
         $set: {
