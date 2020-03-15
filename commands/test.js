@@ -20,13 +20,23 @@ module.exports = {
 
         message.channel.send('<:WoW:682130663553499146>')
         */
-       helper.giveTitle(10, player, client);
+       //helper.giveTitle(11, player, client, message);
+        message.reply('Test is disabled right now sorry boys, no free materials')
+       /*
+       helper.giveMaterial(1,100,player,client,message).then(()=>{
+           message.reply(`You suddenly feel a bunch of rocks in your backpack...
+           You should use command \`inv\` to check it out!`)
+       })
+       */
+       // helper.removeMaterial(1,4,player,client,message)
+
+  
 
        /*
        client.db("Discord_Game").collection("playerData").update({ discordID: player.discordID },{
            $set:{titles: []}
        });
-       */
+      */
        
        
 

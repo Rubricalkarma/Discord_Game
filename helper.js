@@ -5,8 +5,14 @@ module.exports = {
     gainExp: gainExp,
     calcExp: calcExp,
     giveTitle: giveTitle,
-    getTitleByID:getTitleByID,
-    formatDate:formateDate
+    getTitleByID: getTitleByID,
+    formatDate: formateDate,
+    getRarityEmote: getRarityEmote,
+    isAdmin: isAdmin,
+    giveMaterial: giveMaterial,
+    removeMaterial: removeMaterial,
+    getMaterialByID: getMaterialByID,
+    giveGold:giveGold
 };
 
 function claimEnergy(client, player) {
@@ -74,7 +80,7 @@ function payEnergy(client, player, cost) {
     /*CHECKS IF PLAYER HAS ENOUGH ENERGY*/
     if (player.energy.energy < cost) {
         console.log('not enough energy!')
-        return Promise.reject(new Error('Not Enough Energy!'));
+        return Promise.reject(new Error(`This action requires ${cost} energy!`));
     } else {
         return client.db("Discord_Game").collection("playerData").updateOne({ discordID: player.discordID },
             {
@@ -102,7 +108,9 @@ function calcExp(level, difficulty) {
 }
 
 function gainExp(player, experienceGained, skill, message, client) {
+
     const Discord = require('discord.js')
+
     var exp = player.skills[skill].experience + experienceGained;
     var level = player.skills[skill].level;
     var levelsGained = 0;
@@ -114,12 +122,15 @@ function gainExp(player, experienceGained, skill, message, client) {
         expForLevel = experienceForLevel(level + 1);
     }
     var embed = new Discord.RichEmbed()
-        .setTitle(`${player.skills[skill].emote} Mining`)
+        .setTitle(`${player.skills[skill].emote} ${capitalize(skill)}`)
     var mString = `Your ${capitalize(skill)} skill gained ${experienceGained} XP!  [${exp}/${expForLevel}]`
     if (levelsGained > 0) {
         mString += `\nCongrats! Your ${capitalize(skill)} is now level ${level}!`;
     }
     embed.setDescription(mString)
+
+
+
     message.channel.send(embed);
     let levelDB = `skills.${skill}.level`
     let expDB = `skills.${skill}.experience`
@@ -141,7 +152,64 @@ function capitalize(x) {
     return x.charAt(0).toUpperCase() + x.substring(1);
 }
 
-function giveTitle(ID, player, client) {
+function removeMaterial(ID, quantity, player, client) {
+   for(let i =0;i<player.materials.length;i++){
+       var material = player.materials[i]
+        if (material.materialID == ID) {
+            console.log('material found')
+            if (material.quantity > quantity) {
+                console.log('has enough')
+                return client.db("Discord_Game").collection("playerData").update({ discordID: player.discordID, "materials.materialID": ID }, {
+                    $inc: {
+                        "materials.$.quantity": -quantity
+                    }
+                })
+            } else if (material.quantity == quantity) {
+                return client.db("Discord_Game").collection("playerData").update({ discordID: player.discordID }, {
+                    $pull: {
+                        materials: { materialID: ID }
+                    }
+                })
+            } else {
+                return Promise.reject(new Error('Not Enough Material!'))
+            }
+        }
+    }
+    return Promise.reject(new Error('Player does not have this Material!'))
+}
+
+function giveMaterial(ID, quantity, player, client, message) {
+    var hasMaterial = false;
+    player.materials.forEach(material => {
+        if (material.materialID == ID) {
+            hasMaterial = true;
+        }
+    })
+
+    if (hasMaterial) {
+        console.log('has material!')
+        return client.db("Discord_Game").collection("playerData").update({ discordID: player.discordID, "materials.materialID": ID }, {
+            $inc: {
+                "materials.$.quantity": quantity
+            }
+        })
+    } else {
+        return client.db("Discord_Game").collection("playerData").update({ discordID: player.discordID },
+            {
+                $push:
+                {
+                    materials: {
+                        materialID: ID,
+                        quantity: quantity
+                    }
+                }
+            });
+    }
+
+}
+
+function giveTitle(ID, player, client, message) {
+    const Discord = require('discord.js')
     var dup = false;
     player.titles.forEach(title => {
         if (title.titleID == ID) {
@@ -149,10 +217,10 @@ function giveTitle(ID, player, client) {
             dup = true;
         }
     });
-    if(dup){
+    if (dup) {
         return;
     }
-    //console.log('adding')
+
     client.db("Discord_Game").collection("playerData").update({ discordID: player.discordID },
         {
             $push:
@@ -162,13 +230,52 @@ function giveTitle(ID, player, client) {
                     earned: new Date()
                 }
             }
+        }).then(() => {
+            getTitleByID(ID, client).then(title => {
+                message.channel.send(new Discord.RichEmbed()
+                    .setTitle(`:writing_hand: Title Earned`)
+                    .setDescription(`Congrats! You've earned the title **${title.name}**
+                    *${title.description}*
+                    Use command \`titles\` to view and set your titles!`))
+            })
+        })
+}
+
+function getTitleByID(ID, client) {
+    return client.db("Discord_Game").collection("titleData").findOne({ titleID: ID })
+}
+
+function getMaterialByID(ID, client) {
+    return client.db("Discord_Game").collection("materialData").findOne({ materialID: ID })
+}
+
+function formateDate(date) {
+    return `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`;
+}
+
+function giveGold(amount, message, client) {
+    return client.db("Discord_Game").collection("playerData").updateOne({ discordID: message.author.id },
+        {
+            $inc:
+            {
+                gold: amount
+            }
         });
 }
 
-function getTitleByID(ID, client){
-    return client.db("Discord_Game").collection("titleData").findOne({titleID: ID})
+function getRarityEmote(rarity) {
+    switch (rarity) {
+        case 'common': return '<:common:688286901748105222>'
+        case 'uncommon': return '<:uncommon:688422856564015105>'
+        case 'rare': return '<:rare:688424873219063813>'
+        case 'epic': return '<:epic:688425686028779628>'
+        case 'legendary': return '<:legendary:688426575989178408>'
+        case 'unique': return '<:unique:688427003325841436>'
+        default: return ':poop:'
+    }
 }
 
-function formateDate(date){
-    return `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`;
+function isAdmin(player) {
+    var admins = ['224927010667888640']
+    return admins.includes(player.discordID);
 }

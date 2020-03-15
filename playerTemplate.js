@@ -6,6 +6,7 @@ var data = {
     class: args[1],
     setTitleID: null,
     titles: [],
+    materials: [],
     energy: {
         energy: 0,
         maxEnergy: 30,

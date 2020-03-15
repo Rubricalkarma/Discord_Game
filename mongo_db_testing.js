@@ -12,7 +12,7 @@ async function main() {
     //#region URI
     const uri = 'mongodb+srv://Syrus:Raptor66!@cluster0-ddkdn.mongodb.net/test?retryWrites=true&w=majority';
     //#endregion
-    const client = new MongoClient(uri);
+    const client = new MongoClient(uri, { useUnifiedTopology: true });
 
     try {
         await client.connect();
@@ -21,18 +21,20 @@ async function main() {
         //awaitfindOneListingByName(client, 'TestName');
         //await updateListingByName(client, 'TestName', {Level: 200});
         //await findOneListingByName(client,'TestName');
-        await addTitle(client,"Noob", "common", "Earned for being a big noob")
+        //await addTitle(client, "Beta Tester", "legendary", "Earned for beta testing the game!")
+        //await addMaterial(client, "Small Rock", "common", "A small rock found while mining", 2, "", "mining")
+        await addMaterial(client, "Small Tuna", "common", "A commonly found fish", 4, "", "fishing")
         //await addField(client);
     } catch (e) {
         console.error(e);
     } finally {
-        await client.close();
+        //await client.close();
     }
 
 }
 
-async function addItemTest(client){
-    
+async function addItemTest(client) {
+
 }
 
 async function listDatabases(client) {
@@ -66,19 +68,67 @@ async function updateListingByName(client, nameOfListing, updatedListing) {
     console.log(`${result.modifiedCount} document(s) was/were updated.`);
 }
 
-async function addTitle(client, name, rarity, description){
-    var data = {
-        titleID: 10,
-        name: name,
-        rarity: rarity,
-        description: description
-    }
-    await client.db("Discord_Game").collection("titleData").insertOne(data);
+function getMaxTitleID(client) {
+    /*
+    return client.db("Discord_Game").collection("titleData").find({}).sort({titleID: -1}).limit(1).toArray().then(results =>{
+        console.log(results[0].titleID)
+        return results[0].titleID;
+    })
+    */
+
+    return new Promise(function (resolve, reject) {
+        client.db("Discord_Game").collection("titleData").find({}).sort({ titleID: -1 }).limit(1).toArray(function (err, data) {
+            if (err) {
+                reject(err)
+            } else {
+                resolve(data)
+            }
+        })
+    })
+}
+
+function addMaterial(client, name, rarity, description, sellPrice, emoji, skill) {
+
+    client.db("Discord_Game").collection("materialData").find({}).sort({ materialID: -1 }).limit(1).toArray().then(result => {
+        console.log(result[0].materialID);
+        var data = {
+            materialID: result[0].materialID + 1,
+            name: name,
+            rarity: rarity,
+            description: description,
+            sellPrice: sellPrice,
+            emoji: emoji,
+            skill: skill
+        }
+
+        client.db("Discord_Game").collection("materialData").insertOne(data)
+
+    })
+
+
+}
+function addTitle(client, name, rarity, description) {
+
+    getMaxTitleID(client).then(max => {
+        //console.log(max[0]);
+        var data = {
+            titleID: max[0].titleID + 1,
+            name: name,
+            rarity: rarity,
+            description: description
+        }
+        client.db("Discord_Game").collection("titleData").insertOne(data);
+    })
+
+
+
+
+
 }
 
 async function addField(client) {
 
-    result = await client.db("Discord_Game").collection("playerData").updateMany({},{$set: {setTitleID: null, titles: []}});
+    result = await client.db("Discord_Game").collection("playerData").updateMany({}, { $set: { materials: [] } });
     /*
     result = await client.db("Discord_Game").collection("playerData").updateMany({},
         {$set: {

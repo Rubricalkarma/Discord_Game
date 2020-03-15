@@ -31,12 +31,12 @@ module.exports = {
             Promise.all(titlePromises).then(titles => {
                 for (let i = 0; i < titles.length; i++) {
                     let t = titles[i];
-                    titleString += `${i + 1}) \'${t.name}\'\n`
-                    titleRarity += `${t.rarity}\n`
+                    titleString += `\`${i + 1}\` ${t.name}\n`
+                    titleRarity += `${helper.getRarityEmote(t.rarity)}\n`
 
                 }
 
-                console.log(titleString)
+                //console.log(titleString)
 
                 embed.setDescription(`To set your title, use command \`titles set <index>\`\n
                 To remove your title, use command \`titles set none\``)
@@ -102,6 +102,21 @@ module.exports = {
                 })
             })
 
+        }
+        if(args[0] == 'give'){
+            if(helper.isAdmin(player)){
+            helper.giveTitle(parseInt(args[1]),player,client,message)
+            }else{
+                message.channel.send('Only admins have this command!')
+            }
+        }
+        /*DELETES ALL TITLES REMOVE LATER */
+        if(args[0] == 'reset'){
+            client.db("Discord_Game").collection("playerData").update({ discordID: player.discordID },{
+                $set:{titles: []}
+            }).then(()=>{
+                console.log("Titles reset!")
+            })
         }
 
     },
