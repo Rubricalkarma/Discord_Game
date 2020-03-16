@@ -104,11 +104,12 @@ module.exports = {
 
         }
         if(args[0] == 'give'){
-            if(helper.isAdmin(player)){
-            helper.giveTitle(parseInt(args[1]),player,client,message)
-            }else{
-                message.channel.send('Only admins have this command!')
-            }
+            //if(helper.isAdmin(player)){
+            //helper.giveTitle(parseInt(args[1]),player,client,message)
+            message.reply("command disabled atm")
+           // }else{
+            //    message.channel.send('Only admins have this command!')
+            //}
         }
         /*DELETES ALL TITLES REMOVE LATER */
         if(args[0] == 'reset'){

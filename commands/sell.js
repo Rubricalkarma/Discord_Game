@@ -46,7 +46,7 @@ module.exports = {
                 //console.log(materialInfo);
                 var playerMats = player.materials[index]
                 if (hasEnough(playerMats.quantity, amount)) {
-                    console.log('HAS ENOUGH!')
+                    //console.log('HAS ENOUGH!')
                     var goldToGive = amount * materialInfo.sellPrice
                     helper.removeMaterial(playerMats.materialID, amount, player,client).then(() => {
                         helper.giveGold(goldToGive, message, client).then(()=>{

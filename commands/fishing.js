@@ -5,10 +5,21 @@ module.exports = {
 		const helper = require('../helper.js')
         helper.payEnergy(client, player, 5).then( () =>{
 
-            message.channel.send(`You go fishing and caught a fish!`)
-        
-            helper.gainExp(player,helper.calcExp(player.skills['fishing'].level,1),'fishing',message,client).then( () =>{
-                helper.giveMaterial(2,1,player,client,message);
+            //message.channel.send(`You go fishing and caught a fish!`)
+            var loot2 = [];
+            var loot = [{
+                type: 'material',
+                id: 2,
+                quantity: 1
+            },
+            {
+                type: 'material',
+                id: 3,
+                quantity: 1
+            }
+            ]
+            helper.gainExp(player,helper.calcExp(player.skills['fishing'].level,1),'fishing',message,client,loot).then( () =>{
+                //console.log('END FISHING')
             })
         }).catch(err=>{
             console.log(err)

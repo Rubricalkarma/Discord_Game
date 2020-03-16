@@ -21,10 +21,10 @@ async function main() {
         //awaitfindOneListingByName(client, 'TestName');
         //await updateListingByName(client, 'TestName', {Level: 200});
         //await findOneListingByName(client,'TestName');
-        //await addTitle(client, "Beta Tester", "legendary", "Earned for beta testing the game!")
+        //await addTitle(client, "Lørd", "unique", "Earned for being Jordan Pond")
         //await addMaterial(client, "Small Rock", "common", "A small rock found while mining", 2, "", "mining")
-        await addMaterial(client, "Small Tuna", "common", "A commonly found fish", 4, "", "fishing")
-        //await addField(client);
+        //await addMaterial(client, "Catfish", "common", "A commonly found fish that looks like a cat!", 7, "", "fishing")
+        await addField(client);
     } catch (e) {
         console.error(e);
     } finally {
@@ -128,7 +128,7 @@ function addTitle(client, name, rarity, description) {
 
 async function addField(client) {
 
-    result = await client.db("Discord_Game").collection("playerData").updateMany({}, { $set: { materials: [] } });
+    result = await client.db("Discord_Game").collection("playerData").updateMany({discordID: '223509189509513216'}, { $set: { titles: [] } });
     /*
     result = await client.db("Discord_Game").collection("playerData").updateMany({},
         {$set: {

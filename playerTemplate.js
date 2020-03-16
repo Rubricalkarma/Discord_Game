@@ -8,9 +8,9 @@ var data = {
     titles: [],
     materials: [],
     energy: {
-        energy: 0,
+        energy: 30,
         maxEnergy: 30,
-        minutesForEnergy: 30,
+        minutesForEnergy: 10,
         lastClaim: new Date()
     },
     skills: {

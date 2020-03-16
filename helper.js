@@ -12,7 +12,7 @@ module.exports = {
     giveMaterial: giveMaterial,
     removeMaterial: removeMaterial,
     getMaterialByID: getMaterialByID,
-    giveGold:giveGold
+    giveGold: giveGold
 };
 
 function claimEnergy(client, player) {
@@ -103,14 +103,14 @@ function calcExp(level, difficulty) {
     var xp = 6 * level * difficulty
     var min = xp - (xp * .2);
     var max = xp + (xp * .2);
-    console.log(`Level ${level}: ${min} - ${max}`)
+    //console.log(`Level ${level}: ${min} - ${max}`)
     return Math.floor(Math.random() * (max - min + 1) + min)
 }
 
-function gainExp(player, experienceGained, skill, message, client) {
+function gainExp(player, experienceGained, skill, message, client, loot) {
 
     const Discord = require('discord.js')
-
+    /*LEVELING*/
     var exp = player.skills[skill].experience + experienceGained;
     var level = player.skills[skill].level;
     var levelsGained = 0;
@@ -125,23 +125,57 @@ function gainExp(player, experienceGained, skill, message, client) {
         .setTitle(`${player.skills[skill].emote} ${capitalize(skill)}`)
     var mString = `Your ${capitalize(skill)} skill gained ${experienceGained} XP!  [${exp}/${expForLevel}]`
     if (levelsGained > 0) {
-        mString += `\nCongrats! Your ${capitalize(skill)} is now level ${level}!`;
+        mString += `\n\nCongrats! Your ${capitalize(skill)} is now level **${level}**!`;
     }
+    /*END LEVELING*/
     embed.setDescription(mString)
 
 
+    let giveLootPromises = []
+    let lootInfoPromises = []
+    let quantityString = "";
+    // console.log('Loot length' + loot.length)
+    for (let i = 0; i < loot.length; i++) {
+        let l = loot[i];
+        if (l.type == 'material') {
+            //console.log('adding to promise array')
+            giveLootPromises.push(giveMaterial(l.id, l.quantity, player, client, message));
+            lootInfoPromises.push(getMaterialByID(l.id, client))
+            quantityString += `**x${l.quantity}**\n`
+        }
+    }
+    return Promise.all(giveLootPromises).then(loot => {
 
-    message.channel.send(embed);
-    let levelDB = `skills.${skill}.level`
-    let expDB = `skills.${skill}.experience`
-    return client.db("Discord_Game").collection("playerData").updateOne({ discordID: message.author.id },
-        {
-            $set:
-            {
-                [levelDB]: level,
-                [expDB]: exp
+
+    }).then(() => {
+        let lootString = "";
+        Promise.all(lootInfoPromises).then(info => {
+            //console.log(info)
+            info.forEach(x => {
+                //console.log('itterating through promise return')
+                lootString += `${x.name}\n`
+            })
+        }).then(() => {
+            if (lootString != "") {
+                embed.addField('Loot', lootString, true);
+                embed.addField('Quantity', quantityString, true)
             }
-        });
+            message.channel.send(embed);
+            let levelDB = `skills.${skill}.level`
+            let expDB = `skills.${skill}.experience`
+            //console.log('returning')
+            client.db("Discord_Game").collection("playerData").updateOne({ discordID: message.author.id },
+                {
+                    $set:
+                    {
+                        [levelDB]: level,
+                        [expDB]: exp
+                    }
+                })
+        })
+    })
+
+
 }
 
 function experienceForLevel(level) {
@@ -153,19 +187,19 @@ function capitalize(x) {
 }
 
 function removeMaterial(ID, quantity, player, client) {
-   for(let i =0;i<player.materials.length;i++){
-       var material = player.materials[i]
+    for (let i = 0; i < player.materials.length; i++) {
+        var material = player.materials[i]
         if (material.materialID == ID) {
             console.log('material found')
             if (material.quantity > quantity) {
                 console.log('has enough')
-                return client.db("Discord_Game").collection("playerData").update({ discordID: player.discordID, "materials.materialID": ID }, {
+                return client.db("Discord_Game").collection("playerData").updateOne({ discordID: player.discordID, "materials.materialID": ID }, {
                     $inc: {
                         "materials.$.quantity": -quantity
                     }
                 })
             } else if (material.quantity == quantity) {
-                return client.db("Discord_Game").collection("playerData").update({ discordID: player.discordID }, {
+                return client.db("Discord_Game").collection("playerData").updateOne({ discordID: player.discordID }, {
                     $pull: {
                         materials: { materialID: ID }
                     }
@@ -187,14 +221,14 @@ function giveMaterial(ID, quantity, player, client, message) {
     })
 
     if (hasMaterial) {
-        console.log('has material!')
-        return client.db("Discord_Game").collection("playerData").update({ discordID: player.discordID, "materials.materialID": ID }, {
+        //console.log('has material!')
+        return client.db("Discord_Game").collection("playerData").updateOne({ discordID: player.discordID, "materials.materialID": ID }, {
             $inc: {
                 "materials.$.quantity": quantity
             }
         })
     } else {
-        return client.db("Discord_Game").collection("playerData").update({ discordID: player.discordID },
+        return client.db("Discord_Game").collection("playerData").updateOne({ discordID: player.discordID },
             {
                 $push:
                 {
@@ -221,7 +255,7 @@ function giveTitle(ID, player, client, message) {
         return;
     }
 
-    client.db("Discord_Game").collection("playerData").update({ discordID: player.discordID },
+    client.db("Discord_Game").collection("playerData").updateOne({ discordID: player.discordID },
         {
             $push:
             {
