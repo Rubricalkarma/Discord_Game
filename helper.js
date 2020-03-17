@@ -12,7 +12,8 @@ module.exports = {
     giveMaterial: giveMaterial,
     removeMaterial: removeMaterial,
     getMaterialByID: getMaterialByID,
-    giveGold: giveGold
+    giveGold: giveGold,
+    getPlayerByID: getPlayerByID
 };
 
 function claimEnergy(client, player) {
@@ -117,14 +118,14 @@ function gainExp(player, experienceGained, skill, message, client, loot) {
     var expForLevel = experienceForLevel(level + 1);
     while (exp >= expForLevel) {
         exp -= expForLevel;
-        level++;
         levelsGained++;
-        expForLevel = experienceForLevel(level + 1);
+        expForLevel = experienceForLevel(level + levelsGained + 1);
     }
     var embed = new Discord.RichEmbed()
         .setTitle(`${player.skills[skill].emote} ${capitalize(skill)}`)
     var mString = `Your ${capitalize(skill)} skill gained ${experienceGained} XP!  [${exp}/${expForLevel}]`
     if (levelsGained > 0) {
+        level += levelsGained
         mString += `\n\nCongrats! Your ${capitalize(skill)} is now level **${level}**!`;
     }
     /*END LEVELING*/
@@ -134,25 +135,18 @@ function gainExp(player, experienceGained, skill, message, client, loot) {
     let giveLootPromises = []
     let lootInfoPromises = []
     let quantityString = "";
-    // console.log('Loot length' + loot.length)
     for (let i = 0; i < loot.length; i++) {
         let l = loot[i];
         if (l.type == 'material') {
-            //console.log('adding to promise array')
             giveLootPromises.push(giveMaterial(l.id, l.quantity, player, client, message));
             lootInfoPromises.push(getMaterialByID(l.id, client))
             quantityString += `**x${l.quantity}**\n`
         }
     }
-    return Promise.all(giveLootPromises).then(loot => {
-
-
-    }).then(() => {
+    return Promise.all(giveLootPromises).then(loot => {}).then(() => {
         let lootString = "";
         Promise.all(lootInfoPromises).then(info => {
-            //console.log(info)
             info.forEach(x => {
-                //console.log('itterating through promise return')
                 lootString += `${x.name}\n`
             })
         }).then(() => {
@@ -161,21 +155,23 @@ function gainExp(player, experienceGained, skill, message, client, loot) {
                 embed.addField('Quantity', quantityString, true)
             }
             message.channel.send(embed);
-            let levelDB = `skills.${skill}.level`
-            let expDB = `skills.${skill}.experience`
-            //console.log('returning')
-            client.db("Discord_Game").collection("playerData").updateOne({ discordID: message.author.id },
-                {
-                    $set:
-                    {
-                        [levelDB]: level,
-                        [expDB]: exp
-                    }
-                })
+            gainLevel(level, exp, skill, message, client)
         })
     })
 
+}
 
+function gainLevel(newLevel, newExp, skill, message, client) {
+    let levelDB = `skills.${skill}.level`
+    let expDB = `skills.${skill}.experience`
+    client.db("Discord_Game").collection("playerData").updateOne({ discordID: message.author.id },
+        {
+            $set:
+            {
+                [levelDB]: newLevel,
+                [expDB]: newExp
+            }
+        })
 }
 
 function experienceForLevel(level) {
@@ -242,7 +238,7 @@ function giveMaterial(ID, quantity, player, client, message) {
 
 }
 
-function giveTitle(ID, player, client, message) {
+function giveTitle(ID, player, client, message, sendMessage) {
     const Discord = require('discord.js')
     var dup = false;
     player.titles.forEach(title => {
@@ -265,13 +261,15 @@ function giveTitle(ID, player, client, message) {
                 }
             }
         }).then(() => {
-            getTitleByID(ID, client).then(title => {
-                message.channel.send(new Discord.RichEmbed()
-                    .setTitle(`:writing_hand: Title Earned`)
-                    .setDescription(`Congrats! You've earned the title **${title.name}**
+            if (sendMessage) {
+                getTitleByID(ID, client).then(title => {
+                    message.channel.send(new Discord.RichEmbed()
+                        .setTitle(`:writing_hand: Title Earned`)
+                        .setDescription(`Congrats! You've earned the title **${title.name}**
                     *${title.description}*
                     Use command \`titles\` to view and set your titles!`))
-            })
+                })
+            }
         })
 }
 
@@ -312,4 +310,16 @@ function getRarityEmote(rarity) {
 function isAdmin(player) {
     var admins = ['224927010667888640']
     return admins.includes(player.discordID);
+}
+
+function getPlayerByID(playerID, client){
+    return client.db("Discord_Game").collection("playerData").findOne({ discordID: playerID })
+}
+
+function checkRewards(player, client, message, category){
+    var rewards = []
+    switch(category){
+        case 'mining': return;   
+        break;
+    }
 }

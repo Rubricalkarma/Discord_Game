@@ -23,8 +23,8 @@ async function main() {
         //await findOneListingByName(client,'TestName');
         //await addTitle(client, "Lørd", "unique", "Earned for being Jordan Pond")
         //await addMaterial(client, "Small Rock", "common", "A small rock found while mining", 2, "", "mining")
-        //await addMaterial(client, "Catfish", "common", "A commonly found fish that looks like a cat!", 7, "", "fishing")
-        await addField(client);
+        await addMaterial(client, "Bronze Bar", "uncommon", "A bar of bronze", 40, "", "smelting")
+        //await addField(client);
     } catch (e) {
         console.error(e);
     } finally {
@@ -90,7 +90,7 @@ function getMaxTitleID(client) {
 function addMaterial(client, name, rarity, description, sellPrice, emoji, skill) {
 
     client.db("Discord_Game").collection("materialData").find({}).sort({ materialID: -1 }).limit(1).toArray().then(result => {
-        console.log(result[0].materialID);
+        console.log(result[0].materialID + 1);
         var data = {
             materialID: result[0].materialID + 1,
             name: name,
@@ -128,7 +128,7 @@ function addTitle(client, name, rarity, description) {
 
 async function addField(client) {
 
-    result = await client.db("Discord_Game").collection("playerData").updateMany({discordID: '223509189509513216'}, { $set: { titles: [] } });
+    //result = await client.db("Discord_Game").collection("playerData").updateMany({discordID: '223509189509513216'}, { $set: { titles: [] } });
     /*
     result = await client.db("Discord_Game").collection("playerData").updateMany({},
         {$set: {
@@ -171,7 +171,7 @@ async function addField(client) {
         }]
     )
         */
-    /*
+    
     result = await client.db("Discord_Game").collection("playerData").updateMany({}, {
         $set: {
             skills: {
@@ -194,11 +194,16 @@ async function addField(client) {
                     emote:":crystal_ball:",
                     level: 1,
                     experience: 0
+                },
+                smelting:{
+                    emote:":fire:",
+                    level: 1,
+                    experience: 0
                 }
-    
             }
         }
-        */
+    })
+        
     console.log(`${result.matchedCount} document(s) matched the query criteria.`);
     console.log(`${result.modifiedCount} document(s) was/were updated.`);
 }

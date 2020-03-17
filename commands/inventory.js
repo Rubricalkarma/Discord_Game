@@ -18,9 +18,11 @@ module.exports = {
         Promise.all(materialsPromises).then(materials => {
             for (let i = 0; i < materials.length; i++) {
                 let m = materials[i];
+                if(m != null){
                 materialsString += `\`${i+1}\` ${m.name} **x${quantityArray[i]}**\n`
                 valueString += `${m.sellPrice}g\n`
                 rarityString += `${helper.getRarityEmote(m.rarity)}\n`
+                }
             }
 
             helper.getTitleByID(player.setTitleID, client).then(title => {

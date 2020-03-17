@@ -32,6 +32,11 @@ var data = {
             emote: ":crystal_ball:",
             level: 1,
             experience: 0
+        },
+        smelting:{
+            emote:":fire:",
+            level: 1,
+            experience: 0
         }
     },
     timeCreated: new Date()
