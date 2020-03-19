@@ -14,6 +14,8 @@ async function main() {
     //#endregion
     const client = new MongoClient(uri, { useUnifiedTopology: true });
 
+    var ing = [{materialID: 1, quantity: 3},{materialID: 3, quantity: 2}]
+
     try {
         await client.connect();
         //await listDatabases(client);
@@ -23,7 +25,9 @@ async function main() {
         //await findOneListingByName(client,'TestName');
         //await addTitle(client, "Lørd", "unique", "Earned for being Jordan Pond")
         //await addMaterial(client, "Small Rock", "common", "A small rock found while mining", 2, "", "mining")
-        await addMaterial(client, "Bronze Bar", "uncommon", "A bar of bronze", 40, "", "smelting")
+        //await addMaterial(client, "Bronze Bar", "uncommon", "A bar of bronze", 40, "", "smelting")
+        await addRecipe("Cat Rock = Bronze", ing, [{materialID: 5, quantity: 1}], 'smelting',1, client)
+        //await test(client);
         //await addField(client);
     } catch (e) {
         console.error(e);
@@ -33,8 +37,26 @@ async function main() {
 
 }
 
-async function addItemTest(client) {
+async function test(client){
+    client.db("Discord_Game").collection("recipeData").updateOne({recipeID: 1},{
+        $set:{
+            cost: 3
+        }
+    })
+}
 
+
+
+async function addRecipe(name, ingredients,output,skill,cost,client) {
+    var data = {
+        recipeID: 2,
+        name: name,
+        ingredients: ingredients,
+        output: output,
+        skill: skill,
+        cost: cost
+    }
+    await client.db("Discord_Game").collection("recipeData").insertOne(data)
 }
 
 async function listDatabases(client) {

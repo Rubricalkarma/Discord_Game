@@ -21,7 +21,8 @@ module.exports = {
         message.channel.send('<:WoW:682130663553499146>')
         */
        //helper.giveTitle(11, player, client, message);
-        message.reply('Test is disabled right now sorry boys, no free materials')
+        //message.reply('Test is disabled right now sorry boys, no free materials')
+        helper.createRecipe(client,player,1,1)
        /*
        helper.giveMaterial(1,100,player,client,message).then(()=>{
            message.reply(`You suddenly feel a bunch of rocks in your backpack...
