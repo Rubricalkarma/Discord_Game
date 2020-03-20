@@ -14,7 +14,7 @@ async function main() {
     //#endregion
     const client = new MongoClient(uri, { useUnifiedTopology: true });
 
-    var ing = [{materialID: 1, quantity: 3},{materialID: 3, quantity: 2}]
+    var ing = [{materialID: 2, quantity: 1}]
 
     try {
         await client.connect();
@@ -25,10 +25,10 @@ async function main() {
         //await findOneListingByName(client,'TestName');
         //await addTitle(client, "Lørd", "unique", "Earned for being Jordan Pond")
         //await addMaterial(client, "Small Rock", "common", "A small rock found while mining", 2, "", "mining")
-        //await addMaterial(client, "Bronze Bar", "uncommon", "A bar of bronze", 40, "", "smelting")
-        await addRecipe("Cat Rock = Bronze", ing, [{materialID: 5, quantity: 1}], 'smelting',1, client)
+        //await addMaterial(client, "Cooked Tuna", "common", "A cooked piece of tuna", 20, "", "cooking")
+        await addRecipe("Cooked Tuna", ing, [{materialID: 6, quantity: 1}], 'cooking',3, client)
         //await test(client);
-        //await addField(client);
+        await addField(client);
     } catch (e) {
         console.error(e);
     } finally {
@@ -49,7 +49,7 @@ async function test(client){
 
 async function addRecipe(name, ingredients,output,skill,cost,client) {
     var data = {
-        recipeID: 2,
+        recipeID: 3,
         name: name,
         ingredients: ingredients,
         output: output,
@@ -107,6 +107,10 @@ function getMaxTitleID(client) {
             }
         })
     })
+}
+
+function addSkill(client){
+    
 }
 
 function addMaterial(client, name, rarity, description, sellPrice, emoji, skill) {
@@ -219,6 +223,11 @@ async function addField(client) {
                 },
                 smelting:{
                     emote:":fire:",
+                    level: 1,
+                    experience: 0
+                },
+                cooking:{
+                    emote:":meat_on_bone:",
                     level: 1,
                     experience: 0
                 }

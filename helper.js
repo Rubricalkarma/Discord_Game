@@ -14,7 +14,9 @@ module.exports = {
     getMaterialByID: getMaterialByID,
     giveGold: giveGold,
     getPlayerByID: getPlayerByID,
-    createRecipe: createRecipe
+    createRecipe: createRecipe,
+    getMultipleMaterialsByID: getMultipleMaterialsByID,
+    getRecipeByID: getRecipeByID
 };
 
 function claimEnergy(client, player) {
@@ -78,40 +80,59 @@ function claimEnergy(client, player) {
     }
 }
 
-function createRecipe(client, player, recipeID, quantityToCraft) {
-    client.db("Discord_Game").collection("recipeData").findOne({ recipeID: recipeID }).then(recipe => {
+function getRecipeByID(recipeID, client) {
+    return client.db("Discord_Game").collection("recipeData").findOne({ recipeID: recipeID })
+}
+
+function createRecipe(client, player,message, recipeID, quantityToCraft) {
+    getRecipeByID(recipeID, client).then(recipe => {
         var ids = []
         recipe.ingredients.forEach(x => {
             ids.push(x.materialID)
         })
-        getMultipleItemsByID(client, ids).then(materials => {
-            //console.log(`The Recipe to make ${recipe.name} needs ${recipe.ingredients[0].quantity} ${materials[0].name}`)
-            //console.log(player.materials)
-            if (hasIngredients(recipe.ingredients, player.materials, quantityToCraft)) {
-                console.log("Has ingredients!")
-                var removeIngPromises = []
-                recipe.ingredients.forEach( ing =>{
-                    removeIngPromises.push(removeMaterial(ing.materialID,ing.quantity * quantityToCraft,player,client))
-                })
-                Promise.all(removeIngPromises).then( () => {
-                    var giveMatPromises = [];
-                    recipe.output.forEach(recipeOutput =>{
-                        giveMatPromises.push(giveMaterial(recipeOutput.materialID,recipeOutput.quantity *quantityToCraft,player,client))
-                    });
-                    Promise.all(giveMatPromises);
-                    
+        var ingData = hasIngredients(recipe.ingredients, player.materials, quantityToCraft);
+        if (ingData.hasIng) {
+            console.log("Has ingredients!")
+            var removeIngPromises = []
+            recipe.ingredients.forEach(ing => {
+                removeIngPromises.push(removeMaterial(ing.materialID, ing.quantity * quantityToCraft, player, client))
+            })
+            Promise.all(removeIngPromises).then(() => {
+                var giveMatPromises = [];
+                recipe.output.forEach(recipeOutput => {
+                    giveMatPromises.push(giveMaterial(recipeOutput.materialID, recipeOutput.quantity * quantityToCraft, player, client))
+                });
+                Promise.all(giveMatPromises).then(()=>{
+                    message.channel.send(`${recipe.name} x${quantityToCraft} crafted!`)
                 })
 
-            } else {
-                console.log("Dosent have ingredients")
-            }
-        })
+            })
+
+        } else {
+            var missingPromises = [];
+            var missingString = "";
+            ingData.missing.forEach(x => {
+                missingPromises.push(getMaterialByID(x[0],client))
+            })
+            Promise.all(missingPromises).then(missingMaterials => {
+                for(let i = 0;i<missingMaterials.length;i++){
+                    missingString += `Missing ${missingMaterials[i].name} x${ingData.missing[i][1]} \n`
+                }
+                message.channel.send(missingString)
+            })
+            
+
+        }
     })
 }
 
 function hasIngredients(recipeIngredients, materials, quantityToCraft) {
     var materialsIDArray = []
     var hasIng = true;
+    var data = {
+        hasIng: true,
+        missing: []
+    }
     var errorLog = "";
     materials.forEach(x => {
         materialsIDArray.push(x.materialID);
@@ -120,32 +141,34 @@ function hasIngredients(recipeIngredients, materials, quantityToCraft) {
     console.log(materialsIDArray)
     for (let i = 0; i < recipeIngredients.length; i++) {
         //console.log(recipeIngredients[i].materialID)
-        var inc = customIncludes(materialsIDArray,recipeIngredients[i].materialID);
+        var inc = customIncludes(materialsIDArray, recipeIngredients[i].materialID);
 
-       console.log(inc)
-       if(inc > -1){
-           if(materials[inc].quantity >= recipeIngredients[i].quantity * quantityToCraft){
-            
-           }else{
-            hasIng = false
-           }
-       }else{
-           hasIng = false
-       }
+        console.log(inc)
+        if (inc > -1) {
+            if (materials[inc].quantity >= recipeIngredients[i].quantity * quantityToCraft) {
+
+            } else {
+                data.missing.push([materials[inc].materialID, (recipeIngredients[i].quantity * quantityToCraft) - materials[inc].quantity])
+                data.hasIng = false
+            }
+        } else {
+            data.missing.push([recipeIngredients[i].materialID, recipeIngredients[i].quantity * quantityToCraft])
+            data.hasIng = false
+        }
     }
-    return hasIng;
+    return data;
 }
-function customIncludes(arr1, obj){
+function customIncludes(arr1, obj) {
     var index = -1;
-    for(let i=0;i<arr1.length;i++){
-        if(arr1[i]==obj){
+    for (let i = 0; i < arr1.length; i++) {
+        if (arr1[i] == obj) {
             return i;
         }
     }
     return index;
 }
 
-function getMultipleItemsByID(client, materialIDs) {
+function getMultipleMaterialsByID(client, materialIDs) {
     var promises = []
     materialIDs.forEach(x => {
         promises.push(getMaterialByID(x, client))

@@ -22,7 +22,7 @@ module.exports = {
         */
        //helper.giveTitle(11, player, client, message);
         //message.reply('Test is disabled right now sorry boys, no free materials')
-        helper.createRecipe(client,player,1,1)
+        helper.createRecipe(client,player,message,2,3,'smelting')
        /*
        helper.giveMaterial(1,100,player,client,message).then(()=>{
            message.reply(`You suddenly feel a bunch of rocks in your backpack...
