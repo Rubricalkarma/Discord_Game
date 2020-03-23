@@ -14,7 +14,8 @@ async function main() {
     //#endregion
     const client = new MongoClient(uri, { useUnifiedTopology: true });
 
-    var ing = [{materialID: 2, quantity: 1}]
+    var ing = [{materialID: 7, quantity: 3}]
+    var out = [{materialID: 1, quantity: 2}]
 
     try {
         await client.connect();
@@ -25,10 +26,10 @@ async function main() {
         //await findOneListingByName(client,'TestName');
         //await addTitle(client, "Lørd", "unique", "Earned for being Jordan Pond")
         //await addMaterial(client, "Small Rock", "common", "A small rock found while mining", 2, "", "mining")
-        //await addMaterial(client, "Cooked Tuna", "common", "A cooked piece of tuna", 20, "", "cooking")
-        await addRecipe("Cooked Tuna", ing, [{materialID: 6, quantity: 1}], 'cooking',3, client)
+        //await addMaterial(client, "Sturdy Stick", "common", "A strong stick found while foraging", 5, "", "foraging")
+        await addRecipe("Test Rocks", ing, out, 'cooking',3, client)
         //await test(client);
-        await addField(client);
+        //await addField(client);
     } catch (e) {
         console.error(e);
     } finally {
@@ -49,7 +50,7 @@ async function test(client){
 
 async function addRecipe(name, ingredients,output,skill,cost,client) {
     var data = {
-        recipeID: 3,
+        recipeID: 4,
         name: name,
         ingredients: ingredients,
         output: output,

@@ -16,7 +16,9 @@ module.exports = {
     getPlayerByID: getPlayerByID,
     createRecipe: createRecipe,
     getMultipleMaterialsByID: getMultipleMaterialsByID,
-    getRecipeByID: getRecipeByID
+    getRecipeByID: getRecipeByID,
+    getRecipeData: getRecipeData,
+    getRecipeEmbed: getRecipeEmbed
 };
 
 function claimEnergy(client, player) {
@@ -79,12 +81,82 @@ function claimEnergy(client, player) {
         return Promise.resolve();
     }
 }
+function getRecipeEmbed(data, skill) {
+    const Discord = require('discord.js')
+    var embed = new Discord.RichEmbed();
+    embed.setTitle(`${capitalize(skill)} Recipes`)
+    let count = 0;
+    data.recipes.forEach(recipe => {
+        count++;
+        var outputString = "";
+        var ingString = ""
+        console.log(`${recipe.recipe.name}`)
+        recipe.output.forEach(output => {
+            outputString += `\`${count}\` ${output.material.name} x${output.quantity}`
+        })
+        recipe.ingredients.forEach(ingredient => {
+            ingString += `${ingredient.material.name} x${ingredient.quantity}\n`
+        })
+        embed.addField(`${outputString}`, `${ingString}`, true)
+    })
+
+    return embed;
+
+}
 
 function getRecipeByID(recipeID, client) {
     return client.db("Discord_Game").collection("recipeData").findOne({ recipeID: recipeID })
 }
+function getRecipeData(recipeIDs, client) {
+    var data = {
+        recipes: []
+    }
+    var recipeRawDataPromises = []
+    recipeIDs.forEach(x => {
+        recipeRawDataPromises.push(getRecipeByID(x, client))
+    })
+    return Promise.all(recipeRawDataPromises).then(recipeRawData => {
+        //console.log(recipeRawData)
+        var uhOh = []
+        recipeRawData.forEach(x => {
+            //console.log('HELLO')
+            uhOh.push(Promise.all([materialIDAndQuantityToArray(x.output, client), materialIDAndQuantityToArray(x.ingredients, client)]))
+        })
+        return Promise.all(uhOh).then(k => {
+            //console.log(k.length)
+            for (let i = 0; i < k.length; i++) {
+                //console.log('pushing')
+                data.recipes.push({ recipe: recipeRawData[i], ingredients: k[i][1], output: k[i][0] });
+            }
+            //console.log(data)
+            return data;
 
-function createRecipe(client, player,message, recipeID, quantityToCraft) {
+        })
+    })
+}
+/*Takes in Array of materialIDs and Quantities and returns them as Material Obj and Quantity*/
+function materialIDAndQuantityToArray(materialAndQuantityArray, client) {
+    var materials = [];
+    var quantities = [];
+    var materialPromises = [];
+    materialAndQuantityArray.forEach(materialAndQuantity => {
+        materialPromises.push(getMaterialByID(materialAndQuantity.materialID, client))
+        quantities.push(materialAndQuantity.quantity);
+    })
+    return Promise.all(materialPromises).then(x => {
+        x.forEach(obj => {
+            materials.push(obj)
+        })
+        var mats = [];
+        for (let i = 0; i < materials.length; i++) {
+            mats.push({ material: materials[i], quantity: quantities[i] })
+        }
+        return Promise.resolve(mats)
+    })
+
+}
+
+function createRecipe(client, player, message, recipeID, quantityToCraft) {
     getRecipeByID(recipeID, client).then(recipe => {
         var ids = []
         recipe.ingredients.forEach(x => {
@@ -102,7 +174,7 @@ function createRecipe(client, player,message, recipeID, quantityToCraft) {
                 recipe.output.forEach(recipeOutput => {
                     giveMatPromises.push(giveMaterial(recipeOutput.materialID, recipeOutput.quantity * quantityToCraft, player, client))
                 });
-                Promise.all(giveMatPromises).then(()=>{
+                Promise.all(giveMatPromises).then(() => {
                     message.channel.send(`${recipe.name} x${quantityToCraft} crafted!`)
                 })
 
@@ -112,15 +184,15 @@ function createRecipe(client, player,message, recipeID, quantityToCraft) {
             var missingPromises = [];
             var missingString = "";
             ingData.missing.forEach(x => {
-                missingPromises.push(getMaterialByID(x[0],client))
+                missingPromises.push(getMaterialByID(x[0], client))
             })
             Promise.all(missingPromises).then(missingMaterials => {
-                for(let i = 0;i<missingMaterials.length;i++){
+                for (let i = 0; i < missingMaterials.length; i++) {
                     missingString += `Missing ${missingMaterials[i].name} x${ingData.missing[i][1]} \n`
                 }
                 message.channel.send(missingString)
             })
-            
+
 
         }
     })
